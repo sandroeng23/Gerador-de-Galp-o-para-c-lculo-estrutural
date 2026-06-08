@@ -2,19 +2,43 @@ import cadquery as cq
 import math
 
 # ==========================================
-# Dimensões (mm)
+# Entrada manual de parâmetros
 # ==========================================
-L = 15000.0      # vão (largura)
-B = 6000.0      # espaçamento entre pórticos (profundidade)
-H = 6000.0       # altura da coluna
-inclinacao = 0.10  # 10%
 
-# Número de vãos do pórtico
-n_vaos = 10
+def input_float(prompt, default):
+    value = input(f"{prompt} [{default}]: ").strip()
+    if not value:
+        return default
+    try:
+        return float(value.replace(',', '.'))
+    except ValueError:
+        print(f"Valor inválido. Usando padrão: {default}")
+        return default
 
-# Número de pavilhões lado a lado (galpões paralelos)
-n_pavilhoes = 2
-espacamento_pavilhao = 0.0  # espaço entre pavilhões
+
+def input_int(prompt, default, minimum=1):
+    value = input(f"{prompt} [{default}]: ").strip()
+    if not value:
+        return default
+    try:
+        iv = int(value)
+        if iv < minimum:
+            print(f"Valor menor que {minimum}. Usando padrão: {default}")
+            return default
+        return iv
+    except ValueError:
+        print(f"Valor inválido. Usando padrão: {default}")
+        return default
+
+
+print("Informe os parâmetros do galpão. Pressione Enter para aceitar o valor padrão.")
+L = input_float("Vão do galpão L (mm)", 15000.0)
+B = input_float("Espaçamento entre pórticos B (mm)", 6000.0)
+H = input_float("Altura da coluna H (mm)", 6000.0)
+inclinacao = input_float("Inclinação do telhado (%)", 0.10)
+n_vaos = input_int("Número de vãos n_vaos", 10, minimum=1)
+n_pavilhoes = input_int("Número de pavilhões n_pavilhoes", 2, minimum=1)
+espacamento_pavilhao = input_float("Espaçamento entre pavilhões (mm)", 0.0)
 
 # Altura da cumeeira
 Hcum = H + (L/2) * inclinacao
@@ -71,7 +95,7 @@ for x_offset in x_positions:
 # Adicionar terças (longitudinais) na cobertura
 # ==========================================
 # Número de terças por água (espaçamento máximo 2,5 m, conforme manual)
-n_tercas = int(L / 2500) + 1   # ao longo do vão
+n_tercas = max(2, int(L / 2500) + 1)   # ao longo do vão
 for x_offset in x_positions:
     for i in range(n_tercas):
         x = -L/2 + i * (L / (n_tercas - 1))
